@@ -200,13 +200,13 @@ void DetectorConstruction::defineVolumes() {
   greyVisAtt->SetVisibility(true);
   auto *worldVisAtt = new G4VisAttributes(G4Colour::White());
   worldVisAtt->SetVisibility(false);
-  auto *whiteVisAtt = new G4VisAttributes(G4Colour::Brown());
-  whiteVisAtt->SetVisibility(true);
+  auto *PMTVisAtt = new G4VisAttributes(G4Colour::Brown());
+  PMTVisAtt->SetVisibility(true);
   auto *BlueVisAtt = new G4VisAttributes(G4Colour::Blue());
   BlueVisAtt->SetVisibility(true);
 
   logicWorld->SetVisAttributes(worldVisAtt);
-  fPMTLogical->SetVisAttributes(whiteVisAtt);
+  fPMTLogical->SetVisAttributes(PMTVisAtt);
   PMT_BackPlatelogical->SetVisAttributes(greyVisAtt);
   PMTWindowLogical->SetVisAttributes(BlueVisAtt);
 }
