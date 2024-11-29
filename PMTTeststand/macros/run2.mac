@@ -1,0 +1,6 @@
+/Sandbox/Construction/SetWindowWidth 4 mm
+/run/initialize # initializes the simulation
+
+/control/execute gun2.mac
+/Sandbox/Output/DisablePhotonTimeStamps true
+/run/beamOn 1000000
