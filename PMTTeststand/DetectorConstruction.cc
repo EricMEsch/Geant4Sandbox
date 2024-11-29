@@ -200,7 +200,7 @@ void DetectorConstruction::defineVolumes() {
   greyVisAtt->SetVisibility(true);
   auto *worldVisAtt = new G4VisAttributes(G4Colour::White());
   worldVisAtt->SetVisibility(false);
-  auto *whiteVisAtt = new G4VisAttributes(G4Colour::White());
+  auto *whiteVisAtt = new G4VisAttributes(G4Colour::Brown());
   whiteVisAtt->SetVisibility(true);
   auto *BlueVisAtt = new G4VisAttributes(G4Colour::Blue());
   BlueVisAtt->SetVisibility(true);

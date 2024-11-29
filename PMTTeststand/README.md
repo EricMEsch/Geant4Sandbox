@@ -4,6 +4,8 @@
 * Quantum efficiency in `data/` folder will be automatically assigned to the PMT cathode.
 * Pre-defined macro commands can be found in `macros/` folder
 
+![PMTTeststand](PMTTeststand.png)
+
 ## How does work
 
 To build the simulation
