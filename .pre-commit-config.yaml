@@ -1,0 +1,47 @@
+ci:
+  autoupdate_commit_msg: "chore: update pre-commit hooks"
+  autofix_commit_msg: "style: pre-commit fixes"
+
+exclude: ^include/(fmt|magic_enum|CLI11|EcoMug)/
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.6.0
+  hooks:
+  - id: check-added-large-files
+  - id: check-case-conflict
+  - id: check-executables-have-shebangs
+  - id: check-merge-conflict
+  - id: check-symlinks
+  - id: check-yaml
+  - id: check-json
+  - id: debug-statements
+  - id: end-of-file-fixer
+  - id: forbid-new-submodules
+  - id: mixed-line-ending
+  - id: trailing-whitespace
+
+- repo: https://github.com/cheshirekow/cmake-format-precommit
+  rev: v0.6.13
+  hooks:
+  - id: cmake-format
+    additional_dependencies: [pyyaml]
+
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.3.0
+  hooks:
+  - id: codespell
+    args: [--skip=*CLI11.hpp]
+
+- repo: local
+  hooks:
+   - id: clang-tidy
+     name: clang-tidy
+     entry: bash -c 'command -V clang-tidy >&- 2>&-; if [[ $? == 0 && -d build ]]; then clang-tidy -fix -fix-errors -quiet -p=build "$@"; fi'
+     language: system
+     types_or: [c++]
+
+- repo: https://github.com/pre-commit/mirrors-clang-format
+  rev: v18.1.8
+  hooks:
+   - id: clang-format
+     types_or: [c++]

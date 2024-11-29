@@ -1,0 +1,28 @@
+temp
+build
+install
+random
+.local
+.vscode
+
+# G4 outputs
+*.root
+*.hdf5
+
+# G4 visualization
+bookmarkFile
+*.pdf
+*.iv
+
+compile_commands.json
+
+# junk
+*.DS_Store
+*.swp
+*.swo
+.mypy_cache
+__pycache__
+*.dat
+
+# python
+.venv
