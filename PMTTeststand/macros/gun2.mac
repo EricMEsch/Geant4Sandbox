@@ -1,0 +1,8 @@
+/gps/particle mu-
+/gps/pos/type Surface
+/gps/pos/shape Sphere
+/gps/pos/radius 0.18 m
+/gps/ang/type iso
+/gps/ang/maxtheta 90. deg # Only shoot inside the circle
+/gps/ang/mintheta 0. deg
+/gps/energy 3 GeV
