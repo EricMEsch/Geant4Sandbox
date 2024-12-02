@@ -6,7 +6,7 @@
 #include "G4SystemOfUnits.hh"
 
 OpticalDetector::OpticalDetector(G4String name) : G4VSensitiveDetector(name) {
-    DefineCommands();
+  DefineCommands();
 }
 
 //==============================================================================
@@ -40,7 +40,7 @@ G4bool OpticalDetector::ProcessHits(G4Step *step, G4TouchableHistory *ROhist) {
     return false;
   }
 
-  if(!fSurpressPhotonTimestamps) {
+  if (!fSurpressPhotonTimestamps) {
     auto event = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
     auto photon_wavelength =
         CLHEP::c_light * CLHEP::h_Planck / step->GetTotalEnergyDeposit();
@@ -61,12 +61,11 @@ G4bool OpticalDetector::ProcessHits(G4Step *step, G4TouchableHistory *ROhist) {
 
 //==============================================================================
 
-void OpticalDetector::EndOfEvent(G4HCofThisEvent *hit_coll)
-{
+void OpticalDetector::EndOfEvent(G4HCofThisEvent *hit_coll) {
   if (!fSurpressIntegralLight) {
     auto event = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
     const auto ana_man = G4AnalysisManager::Instance();
-    for (const auto& [detector_id, light_count] : IntegralLightCounter) {
+    for (const auto &[detector_id, light_count] : IntegralLightCounter) {
       if (light_count > 0) {
         int col_id = 0;
         ana_man->FillNtupleIColumn(1, col_id++, event->GetEventID());
@@ -80,15 +79,16 @@ void OpticalDetector::EndOfEvent(G4HCofThisEvent *hit_coll)
 
 //==============================================================================
 
-void OpticalDetector::DefineCommands()
-{
-    fGenericMessenger = std::make_unique<G4GenericMessenger>(
+void OpticalDetector::DefineCommands() {
+  fGenericMessenger = std::make_unique<G4GenericMessenger>(
       this, "/Sandbox/Output/", "Control of the output");
 
-  fGenericMessenger->DeclareProperty("DisablePhotonTimeStamps", fSurpressPhotonTimestamps)
+  fGenericMessenger
+      ->DeclareProperty("DisablePhotonTimeStamps", fSurpressPhotonTimestamps)
       .SetGuidance("Disable storing photon timestamps")
       .SetStates(G4State_Idle);
-  fGenericMessenger->DeclareProperty("DisableIntegralLight", fSurpressIntegralLight)
+  fGenericMessenger
+      ->DeclareProperty("DisableIntegralLight", fSurpressIntegralLight)
       .SetGuidance("Disable storing integral light per event")
       .SetStates(G4State_Idle);
 }

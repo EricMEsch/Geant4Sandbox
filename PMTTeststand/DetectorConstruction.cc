@@ -64,12 +64,27 @@ void DetectorConstruction::defineMaterials() {
   fSteelmat = nist->FindOrBuildMaterial("G4_STAINLESS-STEEL");
   fAirmat = nist->FindOrBuildMaterial("G4_AIR");
 
+  // Build custom materials
+  G4Element *H = nist->FindOrBuildElement("H");
+  G4Element *C = nist->FindOrBuildElement("C");
+  G4Element *O = nist->FindOrBuildElement("O");
+
+  fMineralOil = new G4Material("MineralOil", 0.838 * g / cm3, 2);
+  fMineralOil->AddElement(C, 1);
+  fMineralOil->AddElement(H, 2);
+
+  fPET = new G4Material("PET", 1.38 * g / cm3, 3);
+  fPET->AddElement(C, 10);
+  fPET->AddElement(H, 8);
+  fPET->AddElement(O, 4);
+
   //==============================================================================
 
   // add optical properties of materials
   std::vector<G4double> fenergyRindex = {
       1.239841939 * eV / 0.6,
       1.239841939 * eV / 0.1}; // Convert energie from wavelength to eV
+
   // Best i came up with, without any knowledge of the material and 10s research
   std::vector<G4double> RindexPyrex = {
       1.474,
@@ -96,6 +111,27 @@ void DetectorConstruction::defineMaterials() {
   mptAir->AddProperty("RINDEX", fenergyRindex, RindexAir);
 
   fAirmat->SetMaterialPropertiesTable(mptAir);
+
+  // Give Mineral Oil refractive index
+  std::vector<G4double> RindexMineralOil = {
+      1.467, 1.467}; // https://www.sigmaaldrich.com/DE/de/product/sial/161403
+  G4MaterialPropertiesTable *mptMineralOil = new G4MaterialPropertiesTable();
+  mptMineralOil->AddProperty("RINDEX", fenergyRindex, RindexMineralOil);
+  // All plots for mineral oil are without units. But they all show transparency
+  // until ~350nm
+  mptMineralOil->AddProperty("ABSLENGTH", energyAbs, absorptionLengthPyrex);
+
+  fMineralOil->SetMaterialPropertiesTable(mptMineralOil);
+
+  // Give PET refractive index
+  std::vector<G4double> RindexPET = {
+      1.575, 1.575}; // https://de.delta-engineering.be/pet
+  G4MaterialPropertiesTable *mptPET = new G4MaterialPropertiesTable();
+  mptPET->AddProperty("RINDEX", fenergyRindex, RindexPET);
+  // PET is not much different
+  mptPET->AddProperty("ABSLENGTH", energyAbs, absorptionLengthPyrex);
+
+  fPET->SetMaterialPropertiesTable(mptPET);
 }
 
 //==============================================================================
@@ -114,65 +150,135 @@ void DetectorConstruction::defineVolumes() {
                                  "World_phys", 0, false, 0, true);
 
   // Build a PMT
-  G4double realRadius = 127 * mm; // 254/2 mm
-  G4double realHeight = -80 * mm;
+  double cathodeRadius = 127 * mm; // 254/2 mm
+  double cathodeHeight = -80 * mm;
+
+  double TotalWidth = fWindowWidth + fOilWidth + fPEWidth;
+  double TotalHeight = cathodeHeight - TotalWidth;
+  double Layer2Width = fWindowWidth + fOilWidth; // Just Window and Oil layer
+  double OilHeight = cathodeHeight - Layer2Width;
+  double WindowHeight = cathodeHeight - fWindowWidth;
+
   G4int numZPlanes1 = 11;
   G4double zPlane1[] = {0,
-                        realHeight * 0.1,
-                        realHeight * 0.2,
-                        realHeight * 0.3,
-                        realHeight * 0.4,
-                        realHeight * 0.5,
-                        realHeight * 0.6,
-                        realHeight * 0.7,
-                        realHeight * 0.8,
-                        realHeight * 0.9,
-                        realHeight};
+                        cathodeHeight * 0.1,
+                        cathodeHeight * 0.2,
+                        cathodeHeight * 0.3,
+                        cathodeHeight * 0.4,
+                        cathodeHeight * 0.5,
+                        cathodeHeight * 0.6,
+                        cathodeHeight * 0.7,
+                        cathodeHeight * 0.8,
+                        cathodeHeight * 0.9,
+                        cathodeHeight};
   G4double rInner1[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  G4double rOuter1[] = {realRadius,
-                        realRadius * 0.98,
-                        realRadius * 0.95,
-                        realRadius * 0.9,
-                        realRadius * 0.85,
-                        realRadius * 0.7,
-                        realRadius * 0.6,
-                        realRadius * 0.5,
-                        realRadius * 0.4,
-                        realRadius * 0.25,
+  G4double rOuter1[] = {cathodeRadius,
+                        cathodeRadius * 0.98,
+                        cathodeRadius * 0.95,
+                        cathodeRadius * 0.9,
+                        cathodeRadius * 0.85,
+                        cathodeRadius * 0.7,
+                        cathodeRadius * 0.6,
+                        cathodeRadius * 0.5,
+                        cathodeRadius * 0.4,
+                        cathodeRadius * 0.25,
                         0};
-
-  G4double realHeight2 = realHeight - fWindowWidth;
-  // The PMT window
+  // The PMT PET capsule
   G4double zPlane2[] = {0,
-                        realHeight2 * 0.1,
-                        realHeight2 * 0.2,
-                        realHeight2 * 0.3,
-                        realHeight2 * 0.4,
-                        realHeight2 * 0.5,
-                        realHeight2 * 0.6,
-                        realHeight2 * 0.7,
-                        realHeight2 * 0.8,
-                        realHeight2 * 0.9,
-                        realHeight2};
+                        TotalHeight * 0.1,
+                        TotalHeight * 0.2,
+                        TotalHeight * 0.3,
+                        TotalHeight * 0.4,
+                        TotalHeight * 0.5,
+                        TotalHeight * 0.6,
+                        TotalHeight * 0.7,
+                        TotalHeight * 0.8,
+                        TotalHeight * 0.9,
+                        TotalHeight};
   G4double rInner2[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  G4double rOuter2[] = {realRadius + fWindowWidth,
-                        realRadius * 0.98 + fWindowWidth,
-                        realRadius * 0.95 + fWindowWidth,
-                        realRadius * 0.9 + fWindowWidth,
-                        realRadius * 0.85 + fWindowWidth,
-                        realRadius * 0.7 + fWindowWidth,
-                        realRadius * 0.6 + fWindowWidth,
-                        realRadius * 0.5 + fWindowWidth,
-                        realRadius * 0.4 + fWindowWidth,
-                        realRadius * 0.25 + fWindowWidth,
+  G4double rOuter2[] = {cathodeRadius + TotalWidth,
+                        cathodeRadius * 0.98 + TotalWidth,
+                        cathodeRadius * 0.95 + TotalWidth,
+                        cathodeRadius * 0.9 + TotalWidth,
+                        cathodeRadius * 0.85 + TotalWidth,
+                        cathodeRadius * 0.7 + TotalWidth,
+                        cathodeRadius * 0.6 + TotalWidth,
+                        cathodeRadius * 0.5 + TotalWidth,
+                        cathodeRadius * 0.4 + TotalWidth,
+                        cathodeRadius * 0.25 + TotalWidth,
                         0};
 
+  // Oil inside PMT
+  G4double zPlane3[] = {0,
+                        OilHeight * 0.1,
+                        OilHeight * 0.2,
+                        OilHeight * 0.3,
+                        OilHeight * 0.4,
+                        OilHeight * 0.5,
+                        OilHeight * 0.6,
+                        OilHeight * 0.7,
+                        OilHeight * 0.8,
+                        OilHeight * 0.9,
+                        OilHeight};
+  G4double rInner3[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  G4double rOuter3[] = {cathodeRadius + Layer2Width,
+                        cathodeRadius * 0.98 + Layer2Width,
+                        cathodeRadius * 0.95 + Layer2Width,
+                        cathodeRadius * 0.9 + Layer2Width,
+                        cathodeRadius * 0.85 + Layer2Width,
+                        cathodeRadius * 0.7 + Layer2Width,
+                        cathodeRadius * 0.6 + Layer2Width,
+                        cathodeRadius * 0.5 + Layer2Width,
+                        cathodeRadius * 0.4 + Layer2Width,
+                        cathodeRadius * 0.25 + Layer2Width,
+                        0};
+  // Window inside PMT
+  G4double zPlane4[] = {0,
+                        WindowHeight * 0.1,
+                        WindowHeight * 0.2,
+                        WindowHeight * 0.3,
+                        WindowHeight * 0.4,
+                        WindowHeight * 0.5,
+                        WindowHeight * 0.6,
+                        WindowHeight * 0.7,
+                        WindowHeight * 0.8,
+                        WindowHeight * 0.9,
+                        WindowHeight};
+  G4double rInner4[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  G4double rOuter4[] = {cathodeRadius + fWindowWidth,
+                        cathodeRadius * 0.98 + fWindowWidth,
+                        cathodeRadius * 0.95 + fWindowWidth,
+                        cathodeRadius * 0.9 + fWindowWidth,
+                        cathodeRadius * 0.85 + fWindowWidth,
+                        cathodeRadius * 0.7 + fWindowWidth,
+                        cathodeRadius * 0.6 + fWindowWidth,
+                        cathodeRadius * 0.5 + fWindowWidth,
+                        cathodeRadius * 0.4 + fWindowWidth,
+                        cathodeRadius * 0.25 + fWindowWidth,
+                        0};
+
+  // PMT PET capsule
+  auto *PMTPETsolid = new G4Polycone("PMTPET_solid", 0.0, CLHEP::twopi,
+                                     numZPlanes1, zPlane2, rInner2, rOuter2);
+  auto *PMTPETLogical = new G4LogicalVolume(PMTPETsolid, fPET, "PMTPET_log");
+  new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), PMTPETLogical, "PMTPET_phys",
+                    logicWorld, false, 0, true);
+
+  // Oil inside PMT
+  auto *PMTOilsolid = new G4Polycone("PMTOil_solid", 0.0, CLHEP::twopi,
+                                     numZPlanes1, zPlane3, rInner3, rOuter3);
+  auto *PMTOilLogical =
+      new G4LogicalVolume(PMTOilsolid, fMineralOil, "PMTOil_log");
+  new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), PMTOilLogical, "PMTOil_phys",
+                    PMTPETLogical, false, 0, true);
+
+  // Window inside PMT
   auto *PMTWindowsolid = new G4Polycone("PMTWindow_solid", 0.0, CLHEP::twopi,
-                                        numZPlanes1, zPlane2, rInner2, rOuter2);
+                                        numZPlanes1, zPlane4, rInner4, rOuter4);
   auto *PMTWindowLogical =
       new G4LogicalVolume(PMTWindowsolid, fWindowMaterial, "PMTWindow_log");
   new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), PMTWindowLogical,
-                    "PMTWindow_phys", logicWorld, false, 0, true);
+                    "PMTWindow_phys", PMTOilLogical, false, 0, true);
 
   // The sensitive PMT
   auto *PMTsolid = new G4Polycone("PMT_solid", 0.0, CLHEP::twopi, numZPlanes1,
@@ -188,8 +294,8 @@ void DetectorConstruction::defineVolumes() {
   // we place it in the World The visualisation might look like there is a hole
   // between them, but the tracking shows that there is not
   auto *PMT_BackPlatesolid =
-      new G4Tubs("BackPlate_solid", 0.0 * cm, realRadius * 1.2, 0.5 * cm, 0.0,
-                 CLHEP::twopi);
+      new G4Tubs("BackPlate_solid", 0.0 * cm, cathodeRadius * 1.2, 0.5 * cm,
+                 0.0, CLHEP::twopi);
   auto *PMT_BackPlatelogical =
       new G4LogicalVolume(PMT_BackPlatesolid, fSteelmat, "BackPlate_log");
   auto *PMT_BackPlatephysical = new G4PVPlacement(
@@ -198,17 +304,20 @@ void DetectorConstruction::defineVolumes() {
 
   auto *greyVisAtt = new G4VisAttributes(G4Colour::Grey());
   greyVisAtt->SetVisibility(true);
-  auto *worldVisAtt = new G4VisAttributes(G4Colour::White());
-  worldVisAtt->SetVisibility(false);
-  auto *PMTVisAtt = new G4VisAttributes(G4Colour::Brown());
-  PMTVisAtt->SetVisibility(true);
-  auto *BlueVisAtt = new G4VisAttributes(G4Colour::Blue());
-  BlueVisAtt->SetVisibility(true);
+  auto *blackVisAtt = new G4VisAttributes(G4Colour::Black());
+  blackVisAtt->SetVisibility(true);
+  auto *brownVisAtt = new G4VisAttributes(G4Colour::Brown());
+  brownVisAtt->SetVisibility(true);
+  auto *blueVisAtt = new G4VisAttributes(G4Colour::Blue());
+  blueVisAtt->SetVisibility(true);
+  auto *cyanVisAtt = new G4VisAttributes(G4Colour::Cyan());
+  cyanVisAtt->SetVisibility(true);
 
-  logicWorld->SetVisAttributes(worldVisAtt);
-  fPMTLogical->SetVisAttributes(PMTVisAtt);
+  logicWorld->SetVisAttributes(blackVisAtt);
+  PMTOilLogical->SetVisAttributes(brownVisAtt);
   PMT_BackPlatelogical->SetVisAttributes(greyVisAtt);
-  PMTWindowLogical->SetVisAttributes(BlueVisAtt);
+  PMTWindowLogical->SetVisAttributes(blueVisAtt);
+  PMTPETLogical->SetVisAttributes(cyanVisAtt);
 }
 
 //==============================================================================
@@ -269,6 +378,18 @@ void DetectorConstruction::DefineCommands() {
   fGenericMessenger
       ->DeclareMethodWithUnit("SetWindowWidth", "mm",
                               &DetectorConstruction::SetWindowWidth)
+      .SetGuidance("Set the width of the PMT Glass window")
+      .SetParameterName("width", false)
+      .SetStates(G4State_PreInit);
+  fGenericMessenger
+      ->DeclareMethodWithUnit("SetOilWidth", "mm",
+                              &DetectorConstruction::SetOilWidth)
+      .SetGuidance("Set the width of the PMT Glass window")
+      .SetParameterName("width", false)
+      .SetStates(G4State_PreInit);
+  fGenericMessenger
+      ->DeclareMethodWithUnit("SetPETWidth", "mm",
+                              &DetectorConstruction::SetPETWidth)
       .SetGuidance("Set the width of the PMT Glass window")
       .SetParameterName("width", false)
       .SetStates(G4State_PreInit);

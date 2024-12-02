@@ -9,7 +9,7 @@ RunAction::RunAction(std::string outputName) : fOutputName(outputName) {
   man->CreateNtupleDColumn("wavelength_in_nm");
   man->CreateNtupleDColumn("time_in_ns");
   man->FinishNtuple(0);
-  
+
   man->CreateNtuple("TotalHits", "TotalHits");
   man->CreateNtupleIColumn("evtID");
   man->CreateNtupleIColumn("det_uid"); // In case there are multiple PMTs

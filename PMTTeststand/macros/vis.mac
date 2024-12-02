@@ -8,6 +8,6 @@
 /vis/drawVolume # Draws our geometry (volume) into the scene we have previously created
 
 /vis/scene/add/trajectories smooth # Adds particle trajectories to be drawn
-/vis/scene/add/hits 
+/vis/scene/add/hits
 /vis/scene/add/axes
 /vis/scene/endOfEventAction accumulate # Sets the trajectories to stack on top of each other if there are multiple events per run

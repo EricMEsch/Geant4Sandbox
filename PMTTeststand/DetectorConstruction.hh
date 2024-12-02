@@ -29,13 +29,18 @@ private:
   void DefineCommands();
 
   void SetWindowWidth(double width) { fWindowWidth = width; }
+  void SetOilWidth(double width) { fOilWidth = width; }
+  void SetPETWidth(double width) { fPEWidth = width; }
 
-  G4Material *fH2O, *fWindowMaterial, *fAirmat, *fVac, *fSteelmat;
+  G4Material *fH2O, *fWindowMaterial, *fMineralOil, *fPET, *fAirmat, *fVac,
+      *fSteelmat;
 
   G4LogicalVolume *fPMTLogical;
 
   G4VPhysicalVolume *fphysWorld;
-  double fWindowWidth = 4.0 * mm;
+  double fWindowWidth = 3.0 * mm;
+  double fOilWidth = 1.5 * mm;
+  double fPEWidth = 0.3 * mm;
   std::unique_ptr<G4GenericMessenger> fGenericMessenger;
 };
 

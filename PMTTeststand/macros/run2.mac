@@ -1,4 +1,6 @@
-/Sandbox/Construction/SetWindowWidth 4 mm
+/Sandbox/Construction/SetWindowWidth 3 mm
+/Sandbox/Construction/SetOilWidth 1.5 mm
+/Sandbox/Construction/SetPETWidth 0.3 mm
 /run/initialize # initializes the simulation
 
 /control/execute gun2.mac
