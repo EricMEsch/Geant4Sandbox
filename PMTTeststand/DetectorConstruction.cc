@@ -159,103 +159,37 @@ void DetectorConstruction::defineVolumes() {
   double OilHeight = cathodeHeight - Layer2Width;
   double WindowHeight = cathodeHeight - fWindowWidth;
 
-  G4int numZPlanes1 = 11;
-  G4double zPlane1[] = {0,
-                        cathodeHeight * 0.1,
-                        cathodeHeight * 0.2,
-                        cathodeHeight * 0.3,
-                        cathodeHeight * 0.4,
-                        cathodeHeight * 0.5,
-                        cathodeHeight * 0.6,
-                        cathodeHeight * 0.7,
-                        cathodeHeight * 0.8,
-                        cathodeHeight * 0.9,
-                        cathodeHeight};
-  G4double rInner1[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  G4double rOuter1[] = {cathodeRadius,
-                        cathodeRadius * 0.98,
-                        cathodeRadius * 0.95,
-                        cathodeRadius * 0.9,
-                        cathodeRadius * 0.85,
-                        cathodeRadius * 0.7,
-                        cathodeRadius * 0.6,
-                        cathodeRadius * 0.5,
-                        cathodeRadius * 0.4,
-                        cathodeRadius * 0.25,
-                        0};
-  // The PMT PET capsule
-  G4double zPlane2[] = {0,
-                        TotalHeight * 0.1,
-                        TotalHeight * 0.2,
-                        TotalHeight * 0.3,
-                        TotalHeight * 0.4,
-                        TotalHeight * 0.5,
-                        TotalHeight * 0.6,
-                        TotalHeight * 0.7,
-                        TotalHeight * 0.8,
-                        TotalHeight * 0.9,
-                        TotalHeight};
-  G4double rInner2[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  G4double rOuter2[] = {cathodeRadius + TotalWidth,
-                        cathodeRadius * 0.98 + TotalWidth,
-                        cathodeRadius * 0.95 + TotalWidth,
-                        cathodeRadius * 0.9 + TotalWidth,
-                        cathodeRadius * 0.85 + TotalWidth,
-                        cathodeRadius * 0.7 + TotalWidth,
-                        cathodeRadius * 0.6 + TotalWidth,
-                        cathodeRadius * 0.5 + TotalWidth,
-                        cathodeRadius * 0.4 + TotalWidth,
-                        cathodeRadius * 0.25 + TotalWidth,
-                        0};
+  int numZPlanes1 = 11;
+  // Can not use variable for length as C++ arrays have to be static
+  double zPlane1[11], rInner1[11], rOuter1[11];
+  double zPlane2[11], rInner2[11], rOuter2[11];
+  double zPlane3[11], rInner3[11], rOuter3[11];
+  double zPlane4[11], rInner4[11], rOuter4[11];
 
-  // Oil inside PMT
-  G4double zPlane3[] = {0,
-                        OilHeight * 0.1,
-                        OilHeight * 0.2,
-                        OilHeight * 0.3,
-                        OilHeight * 0.4,
-                        OilHeight * 0.5,
-                        OilHeight * 0.6,
-                        OilHeight * 0.7,
-                        OilHeight * 0.8,
-                        OilHeight * 0.9,
-                        OilHeight};
-  G4double rInner3[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  G4double rOuter3[] = {cathodeRadius + Layer2Width,
-                        cathodeRadius * 0.98 + Layer2Width,
-                        cathodeRadius * 0.95 + Layer2Width,
-                        cathodeRadius * 0.9 + Layer2Width,
-                        cathodeRadius * 0.85 + Layer2Width,
-                        cathodeRadius * 0.7 + Layer2Width,
-                        cathodeRadius * 0.6 + Layer2Width,
-                        cathodeRadius * 0.5 + Layer2Width,
-                        cathodeRadius * 0.4 + Layer2Width,
-                        cathodeRadius * 0.25 + Layer2Width,
-                        0};
-  // Window inside PMT
-  G4double zPlane4[] = {0,
-                        WindowHeight * 0.1,
-                        WindowHeight * 0.2,
-                        WindowHeight * 0.3,
-                        WindowHeight * 0.4,
-                        WindowHeight * 0.5,
-                        WindowHeight * 0.6,
-                        WindowHeight * 0.7,
-                        WindowHeight * 0.8,
-                        WindowHeight * 0.9,
-                        WindowHeight};
-  G4double rInner4[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  G4double rOuter4[] = {cathodeRadius + fWindowWidth,
-                        cathodeRadius * 0.98 + fWindowWidth,
-                        cathodeRadius * 0.95 + fWindowWidth,
-                        cathodeRadius * 0.9 + fWindowWidth,
-                        cathodeRadius * 0.85 + fWindowWidth,
-                        cathodeRadius * 0.7 + fWindowWidth,
-                        cathodeRadius * 0.6 + fWindowWidth,
-                        cathodeRadius * 0.5 + fWindowWidth,
-                        cathodeRadius * 0.4 + fWindowWidth,
-                        cathodeRadius * 0.25 + fWindowWidth,
-                        0};
+  // Type values manually as i do not trust floating point precision and i want
+  // to compare the output with the old version
+  double radiusFractions[11] = {1.0, 0.98, 0.95, 0.9,  0.85, 0.7,
+                                0.6, 0.5,  0.4,  0.25, 0.0};
+  double heightFractions[11] = {0.,  0.1, 0.2, 0.3, 0.4, 0.5,
+                                0.6, 0.7, 0.8, 0.9, 1.0};
+
+  for (int i = 0; i < numZPlanes1; ++i) {
+    zPlane1[i] = cathodeHeight * heightFractions[i];
+    rInner1[i] = 0;
+    rOuter1[i] = cathodeRadius * radiusFractions[i];
+
+    zPlane2[i] = TotalHeight * heightFractions[i];
+    rInner2[i] = 0;
+    rOuter2[i] = cathodeRadius * radiusFractions[i] + TotalWidth;
+
+    zPlane3[i] = OilHeight * heightFractions[i];
+    rInner3[i] = 0;
+    rOuter3[i] = cathodeRadius * radiusFractions[i] + Layer2Width;
+
+    zPlane4[i] = WindowHeight * heightFractions[i];
+    rInner4[i] = 0;
+    rOuter4[i] = cathodeRadius * radiusFractions[i] + fWindowWidth;
+  }
 
   // PMT PET capsule
   auto *PMTPETsolid = new G4Polycone("PMTPET_solid", 0.0, CLHEP::twopi,
@@ -263,6 +197,12 @@ void DetectorConstruction::defineVolumes() {
   auto *PMTPETLogical = new G4LogicalVolume(PMTPETsolid, fPET, "PMTPET_log");
   new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), PMTPETLogical, "PMTPET_phys",
                     logicWorld, false, 0, true);
+
+  // G4Rotate3D rotateY(180*deg, G4ThreeVector(0,1,0));
+  // G4Translate3D transX(G4ThreeVector(0.,0., -30.*cm));
+  // G4Transform3D transformPMT = transX * rotateY;
+  // new G4PVPlacement(transformPMT, PMTPETLogical, "PMTPET_phys",
+  //                   logicWorld, false, 0, true);
 
   // Oil inside PMT
   auto *PMTOilsolid = new G4Polycone("PMTOil_solid", 0.0, CLHEP::twopi,
