@@ -1,0 +1,8 @@
+/Sandbox/Construction/SetWindowWidth 3 mm
+/Sandbox/Construction/SetOilWidth 1.5 mm
+/Sandbox/Construction/SetPETWidth 0.3 mm
+/run/initialize # initializes the simulation
+
+/control/execute gun3.mac
+/Sandbox/Output/DisablePhotonTimeStamps true
+/run/beamOn 1000000
